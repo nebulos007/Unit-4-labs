@@ -57,7 +57,22 @@ def main():
         print(f"Sentence {i}: {sentence}")
         embedding = embeddings.embed_query(sentence)
         embedding_vectors.append(embedding)
-    
+
+    # Calculate and display cosine similarity between sentence pairs
+    print("\n=== Cosine Similarity Analysis ===\n")
+
+    # Similarity between Sentence 1 and Sentence 2
+    similarity_1_2 = cosine_similarity(embedding_vectors[0], embedding_vectors[1])
+    print(f"Sentence 1 vs Sentence 2: {similarity_1_2:.4f}")
+
+    # Similarity between Sentence 2 and Sentence 3
+    similarity_2_3 = cosine_similarity(embedding_vectors[1], embedding_vectors[2])
+    print(f"Sentence 2 vs Sentence 3: {similarity_2_3:.4f}")
+
+    # Similarity between Sentence 3 and Sentence 1
+    similarity_3_1 = cosine_similarity(embedding_vectors[2], embedding_vectors[0])
+    print(f"Sentence 3 vs Sentence 1: {similarity_3_1:.4f}")
+
 
 if __name__ == "__main__":
     main()

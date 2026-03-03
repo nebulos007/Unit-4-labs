@@ -50,6 +50,13 @@ def main():
         "The dog made a noise.",
         "The electron spins rapidly."
     ]
+
+    # Generate embeddings for each sentence
+    embedding_vectors = []
+    for i, sentence in enumerate(test_sentences, 1):
+        print(f"Sentence {i}: {sentence}")
+        embedding = embeddings.embed_query(sentence)
+        embedding_vectors.append(embedding)
     
 
 if __name__ == "__main__":

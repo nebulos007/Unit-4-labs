@@ -31,6 +31,14 @@ def main():
         print("\nGet your token from: https://github.com/settings/tokens")
         print("Or use GitHub Models: https://github.com/marketplace/models")
         return
+
+    # Create OpenAIEmbeddings instance with GitHub Models API configuration
+    embeddings = OpenAIEmbeddings(
+        model="text-embedding-3-small",
+        base_url="https://models.inference.ai.azure.com",
+        api_key=os.getenv("GITHUB_TOKEN"),
+        check_embedding_ctx_length=False
+    )
     
 
 if __name__ == "__main__":

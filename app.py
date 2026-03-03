@@ -39,6 +39,17 @@ def main():
         api_key=os.getenv("GITHUB_TOKEN"),
         check_embedding_ctx_length=False
     )
+
+    # Print lab header
+    print("=== Embedding Inspector Lab ===")
+    print("Generating embeddings for three sentences...\n")
+
+    # Test sentences for embedding demonstration
+    test_sentences = [
+        "The canine barked loudly.",
+        "The dog made a noise.",
+        "The electron spins rapidly."
+    ]
     
 
 if __name__ == "__main__":

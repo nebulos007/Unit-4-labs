@@ -16,7 +16,7 @@ def cosine_similarity(vector_a, vector_b):
     
     dot_product = sum(a * b for a, b in zip(vector_a, vector_b))
     norm_a = math.sqrt(sum(a * a for a in vector_a))
-    norm_b = math.sqrt(b * b for b in vector_b)
+    norm_b = math.sqrt(sum(b * b for b in vector_b))
     
     return dot_product / (norm_a * norm_b)
 

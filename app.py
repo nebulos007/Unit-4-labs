@@ -42,6 +42,9 @@ def main():
         check_embedding_ctx_length=False
     )
 
+    # Create InMemoryVectorStore instance
+    vector_store = InMemoryVectorStore(embeddings)
+
     # Print lab header
     print("=== Embedding Inspector Lab ===")
     print("Generating embeddings for three sentences...\n")

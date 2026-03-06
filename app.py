@@ -96,6 +96,9 @@ def main():
     for i, sentence in enumerate(test_sentences):
         print(f"Sentence {i+1}: {sentence}")
 
+    # Generate embeddings for cosine similarity analysis
+    embedding_vectors = [embeddings.embed_query(sentence) for sentence in test_sentences]
+
     # Calculate and display cosine similarity between sentence pairs
     print("\n=== Cosine Similarity Analysis ===\n")
 

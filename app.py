@@ -56,12 +56,22 @@ def main():
         "The electron spins rapidly."
     ]
 
-    # Generate embeddings for each sentence
-    embedding_vectors = []
-    for i, sentence in enumerate(test_sentences, 1):
-        print(f"Sentence {i}: {sentence}")
-        embedding = embeddings.embed_query(sentence)
-        embedding_vectors.append(embedding)
+    # Create metadata for each sentence
+    metadatas = [
+        {
+            "created_at": datetime.now().isoformat(),
+            "index": i
+        }
+        for i in range(len(test_sentences))
+    ]
+
+    # Add sentences to vector store with metadata
+    vector_store.add_texts(test_sentences, metadatas=metadatas)
+
+    # Print confirmation and display stored sentences
+    print(f"✅ Successfully stored {len(test_sentences)} sentences in vector store\n")
+    for i, sentence in enumerate(test_sentences):
+        print(f"Sentence {i+1}: {sentence}")
 
     # Calculate and display cosine similarity between sentence pairs
     print("\n=== Cosine Similarity Analysis ===\n")

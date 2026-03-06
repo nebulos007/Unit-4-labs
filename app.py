@@ -70,13 +70,37 @@ def main():
 
     # Print lab header
     print("=== Embedding Inspector Lab ===")
-    print("Generating embeddings for three sentences...\n")
+    print("Generating embeddings for test sentences...\n")
 
-    # Test sentences for embedding demonstration
+    # Test sentences for embedding demonstration - diverse topics
     test_sentences = [
+        # Animals and pets
         "The canine barked loudly.",
         "The dog made a noise.",
-        "The electron spins rapidly."
+        "My cat loves to sleep on the windowsill.",
+        "The bird sang a beautiful morning song.",
+        
+        # Science and physics
+        "The electron spins rapidly.",
+        "Quantum mechanics studies subatomic particles.",
+        "Gravity pulls objects toward the Earth.",
+        
+        # Food and cooking
+        "I made a delicious pasta for dinner.",
+        "The chef prepared a gourmet meal with fresh ingredients.",
+        "Chocolate cake is a classic dessert.",
+        
+        # Sports and activities
+        "The basketball player scored a three-pointer.",
+        "Running marathons requires endurance and training.",
+        
+        # Weather and nature
+        "The storm brought heavy rain and thunder.",
+        "Sunsets paint the sky with vibrant orange colors.",
+        
+        # Technology and programming
+        "Python is a popular programming language.",
+        "Artificial intelligence is transforming technology."
     ]
 
     # Create metadata for each sentence

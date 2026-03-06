@@ -1,6 +1,6 @@
 import os
 import math
-import datetime
+from datetime import datetime
 from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore

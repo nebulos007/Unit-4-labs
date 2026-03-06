@@ -22,6 +22,29 @@ def cosine_similarity(vector_a, vector_b):
     
     return dot_product / (norm_a * norm_b)
 
+def search_sentences(vector_store, query, k=3):
+    """
+    Search for similar sentences in the vector store.
+    
+    Args:
+        vector_store: The InMemoryVectorStore instance
+        query (str): The search query string
+        k (int): Number of results to return (default: 3)
+    
+    Returns:
+        list: List of tuples containing (document, similarity_score)
+    """
+    # Perform similarity search with scores
+    results = vector_store.similarity_search_with_score(query, k=k)
+    
+    # Print search results with formatting
+    print(f"\n🔍 Search Results for: \"{query}\"\n")
+    
+    for rank, (document, score) in enumerate(results, 1):
+        print(f"{rank}. Similarity: {score:.4f} | {document.page_content}")
+    
+    return results
+
 def main():
     print("🤖 Python LangChain Agent Starting...\n")
 
@@ -87,6 +110,25 @@ def main():
     # Similarity between Sentence 3 and Sentence 1
     similarity_3_1 = cosine_similarity(embedding_vectors[2], embedding_vectors[0])
     print(f"Sentence 3 vs Sentence 1: {similarity_3_1:.4f}")
+
+    # Interactive semantic search loop
+    print("\n=== Semantic Search ===")
+    
+    while True:
+        query = input("\nEnter a search query (or 'quit' to exit): ").strip()
+        
+        # Check for exit commands
+        if query.lower() in ["quit", "exit"]:
+            break
+        
+        # Skip empty queries
+        if not query:
+            continue
+        
+        # Perform semantic search
+        search_sentences(vector_store, query)
+    
+    print("\n👋 Goodbye! Thanks for using the Embedding Inspector Lab.\n")
 
 
 if __name__ == "__main__":

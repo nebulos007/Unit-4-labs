@@ -70,92 +70,75 @@ def main():
 
     # Print lab header
     print("=== Embedding Inspector Lab ===")
-    print("Generating embeddings for test sentences...\n")
+    print("Loading documents from file system...\n")
 
-    # Test sentences for embedding demonstration - diverse topics
-    test_sentences = [
-        # Animals and pets
-        "The canine barked loudly.",
-        "The dog made a noise.",
-        "My cat loves to sleep on the windowsill.",
-        "The bird sang a beautiful morning song.",
-        
-        # Science and physics
-        "The electron spins rapidly.",
-        "Quantum mechanics studies subatomic particles.",
-        "Gravity pulls objects toward the Earth.",
-        
-        # Food and cooking
-        "I made a delicious pasta for dinner.",
-        "The chef prepared a gourmet meal with fresh ingredients.",
-        "Chocolate cake is a classic dessert.",
-        
-        # Sports and activities
-        "The basketball player scored a three-pointer.",
-        "Running marathons requires endurance and training.",
-        
-        # Weather and nature
-        "The storm brought heavy rain and thunder.",
-        "Sunsets paint the sky with vibrant orange colors.",
-        
-        # Technology and programming
-        "Python is a popular programming language.",
-        "Artificial intelligence is transforming technology."
-    ]
+    # TODO: Replace with document loading logic
+    # # Test sentences for embedding demonstration - diverse topics
+    # test_sentences = [
+    #     # Animals and pets
+    #     "The canine barked loudly.",
+    #     "The dog made a noise.",
+    #     "My cat loves to sleep on the windowsill.",
+    #     "The bird sang a beautiful morning song.",
+    #     
+    #     # Science and physics
+    #     "The electron spins rapidly.",
+    #     "Quantum mechanics studies subatomic particles.",
+    #     "Gravity pulls objects toward the Earth.",
+    #     
+    #     # Food and cooking
+    #     "I made a delicious pasta for dinner.",
+    #     "The chef prepared a gourmet meal with fresh ingredients.",
+    #     "Chocolate cake is a classic dessert.",
+    #     
+    #     # Sports and activities
+    #     "The basketball player scored a three-pointer.",
+    #     "Running marathons requires endurance and training.",
+    #     
+    #     # Weather and nature
+    #     "The storm brought heavy rain and thunder.",
+    #     "Sunsets paint the sky with vibrant orange colors.",
+    #     
+    #     # Technology and programming
+    #     "Python is a popular programming language.",
+    #     "Artificial intelligence is transforming technology."
+    # ]
 
-    # Create metadata for each sentence
-    metadatas = [
-        {
-            "created_at": datetime.now().isoformat(),
-            "index": i
-        }
-        for i in range(len(test_sentences))
-    ]
-
-    # Add sentences to vector store with metadata
-    vector_store.add_texts(test_sentences, metadatas=metadatas)
-
-    # Print confirmation and display stored sentences
-    print(f"✅ Successfully stored {len(test_sentences)} sentences in vector store\n")
-    for i, sentence in enumerate(test_sentences):
-        print(f"Sentence {i+1}: {sentence}")
-
-    # Generate embeddings for cosine similarity analysis
-    embedding_vectors = [embeddings.embed_query(sentence) for sentence in test_sentences]
-
-    # Calculate and display cosine similarity between sentence pairs
-    print("\n=== Cosine Similarity Analysis ===\n")
-
-    # Similarity between Sentence 1 and Sentence 2
-    similarity_1_2 = cosine_similarity(embedding_vectors[0], embedding_vectors[1])
-    print(f"Sentence 1 vs Sentence 2: {similarity_1_2:.4f}")
-
-    # Similarity between Sentence 2 and Sentence 3
-    similarity_2_3 = cosine_similarity(embedding_vectors[1], embedding_vectors[2])
-    print(f"Sentence 2 vs Sentence 3: {similarity_2_3:.4f}")
-
-    # Similarity between Sentence 3 and Sentence 1
-    similarity_3_1 = cosine_similarity(embedding_vectors[2], embedding_vectors[0])
-    print(f"Sentence 3 vs Sentence 1: {similarity_3_1:.4f}")
-
-    # Interactive semantic search loop
-    print("\n=== Semantic Search ===")
-    
-    while True:
-        query = input("\nEnter a search query (or 'quit' to exit): ").strip()
-        
-        # Check for exit commands
-        if query.lower() in ["quit", "exit"]:
-            break
-        
-        # Skip empty queries
-        if not query:
-            continue
-        
-        # Perform semantic search
-        search_sentences(vector_store, query)
-    
-    print("\n👋 Goodbye! Thanks for using the Embedding Inspector Lab.\n")
+    # TODO: Replace with document loading and storage logic
+    # # Create metadata for each sentence
+    # metadatas = [
+    #     {
+    #         "created_at": datetime.now().isoformat(),
+    #         "index": i
+    #     }
+    #     for i in range(len(test_sentences))
+    # ]
+    #
+    # # Add sentences to vector store with metadata
+    # vector_store.add_texts(test_sentences, metadatas=metadatas)
+    #
+    # # Print confirmation and display stored sentences
+    # print(f"✅ Successfully stored {len(test_sentences)} sentences in vector store\n")
+    # for i, sentence in enumerate(test_sentences):
+    #     print(f"Sentence {i+1}: {sentence}")
+    #
+    # # Generate embeddings for cosine similarity analysis
+    # embedding_vectors = [embeddings.embed_query(sentence) for sentence in test_sentences]
+    #
+    # # Calculate and display cosine similarity between sentence pairs
+    # print("\n=== Cosine Similarity Analysis ===\n")
+    #
+    # # Similarity between Sentence 1 and Sentence 2
+    # similarity_1_2 = cosine_similarity(embedding_vectors[0], embedding_vectors[1])
+    # print(f"Sentence 1 vs Sentence 2: {similarity_1_2:.4f}")
+    #
+    # # Similarity between Sentence 2 and Sentence 3
+    # similarity_2_3 = cosine_similarity(embedding_vectors[1], embedding_vectors[2])
+    # print(f"Sentence 2 vs Sentence 3: {similarity_2_3:.4f}")
+    #
+    # # Similarity between Sentence 3 and Sentence 1
+    # similarity_3_1 = cosine_similarity(embedding_vectors[2], embedding_vectors[0])
+    # print(f"Sentence 3 vs Sentence 1: {similarity_3_1:.4f}")
 
 
 if __name__ == "__main__":

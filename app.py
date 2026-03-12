@@ -108,6 +108,61 @@ def load_document(vector_store, file_path):
             print(f"❌ Error loading file '{file_path}': {str(e)}")
         return None
 
+def load_document_with_chunks(vector_store, file_path, chunks):
+    """
+    Load document chunks into the vector store with updated metadata.
+    
+    Args:
+        vector_store: The InMemoryVectorStore instance
+        file_path (str): Path to the original document file
+        chunks (list): List of LangChain Document objects (chunks)
+    
+    Returns:
+        int: Total number of chunks successfully stored
+    
+    Raises:
+        Exception: For document storage errors
+    """
+    try:
+        file_name = os.path.basename(file_path)
+        total_chunks = len(chunks)
+        chunks_stored = 0
+        
+        # Process each chunk
+        for i, chunk in enumerate(chunks, 1):
+            # Update metadata for each chunk
+            chunk.metadata.update({
+                "fileName": f"{file_name} (Chunk {i}/{total_chunks})",
+                "createdAt": datetime.now().isoformat(),
+                "chunkIndex": i
+            })
+            
+            # Add chunk to vector store
+            doc_ids = vector_store.add_documents([chunk])
+            
+            if doc_ids:
+                chunks_stored += 1
+                print(f"✅ Loaded chunk {i}/{total_chunks} from '{file_name}' ({len(chunk.page_content)} characters)")
+            else:
+                print(f"⚠️ Failed to store chunk {i}/{total_chunks}")
+        
+        print(f"\n✅ Successfully stored {chunks_stored}/{total_chunks} chunks\n")
+        return chunks_stored
+    
+    except Exception as e:
+        error_message = str(e).lower()
+        
+        # Check if error is related to document size/token limits
+        if "maximum context length" in error_message or "token" in error_message:
+            print(f"❌ Error loading chunks from '{os.path.basename(file_path)}':")
+            print("⚠️ One or more chunks exceeded the token limit.")
+            print("Token limit exceeded. The embedding model can only process up to 8,191 tokens at once.")
+            print("Solution: Reduce the chunk_size parameter for smaller chunks.")
+        else:
+            print(f"❌ Error loading chunks from '{file_path}': {str(e)}")
+        
+        return 0
+
 def main():
     print("🤖 Python LangChain Agent Starting...\n")
 

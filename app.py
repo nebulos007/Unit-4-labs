@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import CharacterTextSplitter
+from langchain_text_splitters import MarkdownHeaderTextSplitter
+from langchain_text_splitters import Language
 
 # Load environment variables
 load_dotenv()

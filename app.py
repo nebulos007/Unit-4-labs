@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
+from langchain_core.tools import tool
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_text_splitters import MarkdownHeaderTextSplitter
@@ -338,6 +339,46 @@ def load_with_markdown_structure_chunking(vector_store, file_path):
     except Exception as e:
         print(f"❌ Error chunking file '{file_path}': {str(e)}")
         return 0
+
+def create_search_tool(vector_store):
+    """
+    Create a LangChain Tool for searching the company document repository.
+    
+    Args:
+        vector_store: The InMemoryVectorStore instance containing indexed documents
+    
+    Returns:
+        A LangChain Tool that agents can use for semantic search
+    """
+    
+    @tool
+    def search_documents(query: str) -> str:
+        """
+        Searches the company document repository for relevant information based on the given query.
+        Use this to find information about company policies, benefits, and procedures.
+        
+        Args:
+            query: The search query string
+        
+        Returns:
+            Formatted search results with similarity scores
+        """
+        # Perform similarity search
+        results = vector_store.similarity_search_with_score(query, k=3)
+        
+        # Format results
+        if not results:
+            return "No relevant documents found."
+        
+        formatted_results = []
+        for i, (doc, score) in enumerate(results, 1):
+            formatted_results.append(
+                f"Result {i} (Score: {score:.4f}): {doc.page_content}"
+            )
+        
+        return "\n\n".join(formatted_results)
+    
+    return search_documents
 
 def main():
     print("🤖 Python LangChain Agent Starting...\n")

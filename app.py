@@ -213,6 +213,132 @@ def load_with_fixed_size_chunking(vector_store, file_path):
         print(f"❌ Error chunking file '{file_path}': {str(e)}")
         return 0
 
+def load_with_paragraph_chunking(vector_store, file_path):
+    """
+    Load a document by splitting it into chunks while preserving paragraphs.
+    Uses RecursiveCharacterTextSplitter to intelligently split on paragraphs first,
+    then newlines, then spaces.
+    
+    Args:
+        vector_store: The InMemoryVectorStore instance
+        file_path (str): Path to the file to load and chunk
+    
+    Returns:
+        int: Total number of chunks successfully stored
+    """
+    try:
+        # Read the file content
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+        
+        # Create RecursiveCharacterTextSplitter with paragraph-aware splitting
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1500,
+            chunk_overlap=0,
+            separators=["\n\n", "\n", " ", ""]
+        )
+        
+        # Split text into chunks (returns strings)
+        text_chunks = splitter.split_text(content)
+        
+        # Create Document objects from chunks
+        documents = [Document(page_content=chunk) for chunk in text_chunks]
+        
+        # Load chunks into vector store
+        file_name = os.path.basename(file_path)
+        chunks_stored = load_document_with_chunks(vector_store, file_path, documents)
+        
+        # Print comparison statistics
+        if documents:
+            chunk_sizes = [len(chunk.page_content) for chunk in documents]
+            avg_chunk_size = sum(chunk_sizes) / len(chunk_sizes)
+            min_chunk_size = min(chunk_sizes)
+            max_chunk_size = max(chunk_sizes)
+            
+            # Count chunks that start with newline (indicating paragraph preservation)
+            paragraph_preserved = sum(1 for chunk in documents if chunk.page_content.startswith('\n'))
+            
+            print(f"📊 Paragraph-Aware Chunking Statistics for '{file_name}':")
+            print(f"   - Total chunks created: {len(documents)}")
+            print(f"   - Average chunk size: {avg_chunk_size:.0f} characters")
+            print(f"   - Smallest chunk: {min_chunk_size} characters")
+            print(f"   - Largest chunk: {max_chunk_size} characters")
+            print(f"   - Chunks preserving paragraph boundaries: {paragraph_preserved}\n")
+        
+        return chunks_stored
+    
+    except FileNotFoundError:
+        print(f"❌ Error: File not found at '{file_path}'")
+        return 0
+    
+    except Exception as e:
+        print(f"❌ Error chunking file '{file_path}': {str(e)}")
+        return 0
+
+def load_with_markdown_structure_chunking(vector_store, file_path):
+    """
+    Load a markdown document by splitting on markdown headers while preserving structure.
+    Uses MarkdownHeaderTextSplitter to split on headers, then RecursiveCharacterTextSplitter
+    for final chunking with overlap.
+    
+    Args:
+        vector_store: The InMemoryVectorStore instance
+        file_path (str): Path to the markdown file to load and chunk
+    
+    Returns:
+        int: Total number of chunks successfully stored
+    """
+    try:
+        # Read the file content
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+        
+        # Step 1: Split markdown by headers to preserve document structure
+        headers_to_split_on = [
+            ("#", "Header 1"),
+            ("##", "Header 2")
+        ]
+        markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
+        markdown_chunks = markdown_splitter.split_text(content)
+        
+        # Step 2: Apply RecursiveCharacterTextSplitter for final chunking with overlap
+        recursive_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=5000,
+            chunk_overlap=200
+        )
+        
+        # Split each markdown chunk further
+        documents = []
+        for chunk in markdown_chunks:
+            split_docs = recursive_splitter.split_documents([chunk])
+            documents.extend(split_docs)
+        
+        # Load chunks into vector store
+        file_name = os.path.basename(file_path)
+        chunks_stored = load_document_with_chunks(vector_store, file_path, documents)
+        
+        # Print statistics
+        if documents:
+            chunk_sizes = [len(doc.page_content) for doc in documents]
+            avg_chunk_size = sum(chunk_sizes) / len(chunk_sizes)
+            
+            print(f"📊 Markdown Structure-Aware Chunking Statistics for '{file_name}':")
+            print(f"   - Total chunks created: {len(documents)}")
+            print(f"   - Average chunk size: {avg_chunk_size:.0f} characters")
+            print(f"   - Smallest chunk: {min(chunk_sizes)} characters")
+            print(f"   - Largest chunk: {max(chunk_sizes)} characters")
+            print(f"   - Chunk overlap: 200 characters for context preservation\n")
+        
+        return chunks_stored
+    
+    except FileNotFoundError:
+        print(f"❌ Error: File not found at '{file_path}'")
+        return 0
+    
+    except Exception as e:
+        print(f"❌ Error chunking file '{file_path}': {str(e)}")
+        return 0
+
 def main():
     print("🤖 Python LangChain Agent Starting...\n")
 
@@ -248,9 +374,9 @@ def main():
     else:
         print(f"⚠️ Failed to load document. Continuing...\n")
 
-    # Load the EmployeeHandbook document with chunking
+    # Load the EmployeeHandbook document with markdown structure-aware chunking
     document_file = "EmployeeHandbook.md"
-    chunks_stored = load_with_fixed_size_chunking(vector_store, document_file)
+    chunks_stored = load_with_markdown_structure_chunking(vector_store, document_file)
     
     if chunks_stored > 0:
         print(f"✅ Document '{document_file}' successfully chunked and indexed in vector store\n")

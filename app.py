@@ -118,6 +118,18 @@ def main():
     # Create InMemoryVectorStore instance
     vector_store = InMemoryVectorStore(embeddings)
 
+    # Display header for document loading
+    print("=== Loading Documents into Vector Database ===\n")
+
+    # Load the HealthInsuranceBrochure document
+    document_file = "HealthInsuranceBrochure.md"
+    doc_id = load_document(vector_store, document_file)
+    
+    if doc_id:
+        print(f"✅ Document '{document_file}' successfully indexed in vector store\n")
+    else:
+        print(f"⚠️ Failed to load document. Continuing...\n")
+
     # Print lab header
     print("=== Embedding Inspector Lab ===")
     print("Loading documents from file system...\n")

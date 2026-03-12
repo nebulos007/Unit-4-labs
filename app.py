@@ -92,7 +92,16 @@ def load_document(vector_store, file_path):
         return None
     
     except Exception as e:
-        print(f"❌ Error loading file '{file_path}': {str(e)}")
+        error_message = str(e).lower()
+        
+        # Check if error is related to document size/token limits
+        if "maximum context length" in error_message or "token" in error_message:
+            print(f"❌ Error loading '{os.path.basename(file_path)}':")
+            print("⚠️ This document is too large to embed as a single chunk.")
+            print("Token limit exceeded. The embedding model can only process up to 8,191 tokens at once.")
+            print("Solution: The document needs to be split into smaller chunks.")
+        else:
+            print(f"❌ Error loading file '{file_path}': {str(e)}")
         return None
 
 def main():
@@ -123,6 +132,15 @@ def main():
 
     # Load the HealthInsuranceBrochure document
     document_file = "HealthInsuranceBrochure.md"
+    doc_id = load_document(vector_store, document_file)
+    
+    if doc_id:
+        print(f"✅ Document '{document_file}' successfully indexed in vector store\n")
+    else:
+        print(f"⚠️ Failed to load document. Continuing...\n")
+
+    # Load the EmployeeHandbook document
+    document_file = "EmployeeHandbook.md"
     doc_id = load_document(vector_store, document_file)
     
     if doc_id:

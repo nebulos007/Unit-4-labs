@@ -4,6 +4,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
+from langchain_core.documents import Document
 
 # Load environment variables
 load_dotenv()
@@ -44,6 +45,55 @@ def search_sentences(vector_store, query, k=3):
         print(f"{rank}. Similarity: {score:.4f} | {document.page_content}")
     
     return results
+
+def load_document(vector_store, file_path):
+    """
+    Load a document from a file and add it to the vector store.
+    
+    Args:
+        vector_store: The InMemoryVectorStore instance
+        file_path (str): Path to the file to load
+    
+    Returns:
+        str: The document ID or message indicating success
+    
+    Raises:
+        FileNotFoundError: If the file does not exist
+        Exception: For other file reading errors
+    """
+    try:
+        # Read the file content
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+        
+        # Extract file name from path
+        file_name = os.path.basename(file_path)
+        
+        # Create a Document object with metadata
+        document = Document(
+            page_content=content,
+            metadata={
+                "fileName": file_name,
+                "createdAt": datetime.now().isoformat()
+            }
+        )
+        
+        # Add document to vector store
+        doc_ids = vector_store.add_documents([document])
+        
+        # Print success message
+        print(f"✅ Loaded '{file_name}' ({len(content)} characters)")
+        
+        # Return the document ID
+        return doc_ids[0] if doc_ids else "Document added"
+    
+    except FileNotFoundError:
+        print(f"❌ Error: File not found at '{file_path}'")
+        return None
+    
+    except Exception as e:
+        print(f"❌ Error loading file '{file_path}': {str(e)}")
+        return None
 
 def main():
     print("🤖 Python LangChain Agent Starting...\n")

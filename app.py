@@ -163,6 +163,56 @@ def load_document_with_chunks(vector_store, file_path, chunks):
         
         return 0
 
+def load_with_fixed_size_chunking(vector_store, file_path):
+    """
+    Load a document by splitting it into fixed-size chunks using CharacterTextSplitter.
+    
+    Args:
+        vector_store: The InMemoryVectorStore instance
+        file_path (str): Path to the file to load and chunk
+    
+    Returns:
+        int: Total number of chunks successfully stored
+    """
+    try:
+        # Read the file content
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+        
+        # Create CharacterTextSplitter with fixed parameters
+        splitter = CharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=0,
+            separator=" "
+        )
+        
+        # Split text into chunks (returns strings)
+        text_chunks = splitter.split_text(content)
+        
+        # Create Document objects from chunks
+        documents = [Document(page_content=chunk) for chunk in text_chunks]
+        
+        # Load chunks into vector store
+        file_name = os.path.basename(file_path)
+        chunks_stored = load_document_with_chunks(vector_store, file_path, documents)
+        
+        # Print statistics
+        if documents:
+            avg_chunk_size = sum(len(chunk.page_content) for chunk in documents) / len(documents)
+            print(f"📊 Chunking Statistics for '{file_name}':")
+            print(f"   - Total chunks created: {len(documents)}")
+            print(f"   - Average chunk size: {avg_chunk_size:.0f} characters\n")
+        
+        return chunks_stored
+    
+    except FileNotFoundError:
+        print(f"❌ Error: File not found at '{file_path}'")
+        return 0
+    
+    except Exception as e:
+        print(f"❌ Error chunking file '{file_path}': {str(e)}")
+        return 0
+
 def main():
     print("🤖 Python LangChain Agent Starting...\n")
 
@@ -198,12 +248,12 @@ def main():
     else:
         print(f"⚠️ Failed to load document. Continuing...\n")
 
-    # Load the EmployeeHandbook document
+    # Load the EmployeeHandbook document with chunking
     document_file = "EmployeeHandbook.md"
-    doc_id = load_document(vector_store, document_file)
+    chunks_stored = load_with_fixed_size_chunking(vector_store, document_file)
     
-    if doc_id:
-        print(f"✅ Document '{document_file}' successfully indexed in vector store\n")
+    if chunks_stored > 0:
+        print(f"✅ Document '{document_file}' successfully chunked and indexed in vector store\n")
     else:
         print(f"⚠️ Failed to load document. Continuing...\n")
 

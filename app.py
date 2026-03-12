@@ -2,7 +2,7 @@ import os
 import math
 from datetime import datetime
 from dotenv import load_dotenv
-from langchain_openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
 from langchain_core.tools import tool
@@ -402,6 +402,14 @@ def main():
 
     # Create InMemoryVectorStore instance
     vector_store = InMemoryVectorStore(embeddings)
+
+    # Create ChatOpenAI instance with GitHub Models API configuration
+    chat_model = ChatOpenAI(
+        model="gpt-4o",
+        temperature=0,
+        base_url="https://models.inference.ai.azure.com",
+        api_key=os.getenv("GITHUB_TOKEN")
+    )
 
     # Display header for document loading
     print("=== Loading Documents into Vector Database ===\n")

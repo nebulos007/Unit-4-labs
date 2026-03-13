@@ -10,6 +10,10 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 from langchain_text_splitters import Language
+from langchain_classic.agents import AgentExecutor
+from langchain_classic.agents.react.agent import create_react_agent
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 
 # Load environment variables
 load_dotenv()
@@ -432,9 +436,109 @@ def main():
     else:
         print(f"⚠️ Failed to load document. Continuing...\n")
 
-    # Print lab header
-    print("=== Embedding Inspector Lab ===")
-    print("Loading documents from file system...\n")
+   # =================================================================
+    # ReAct Pattern Agent Setup
+    # =================================================================
+    print("=== Initializing ReAct Agent ===\n")
+    
+    # Create the search tool from the vector store
+    search_tool = create_search_tool(vector_store)
+    search_tools = [search_tool]
+    
+    # Create the prompt template with ReAct pattern
+    # System message provides the agent's role and guidelines
+    # MessagesPlaceholder for chat_history maintains conversation context
+    # user input placeholder for the question
+    # {agent_scratchpad} for tracking the agent's reasoning process (as a string, not a message list)
+    # Note: {tools} and {tool_names} are required placeholders for create_react_agent
+    prompt = ChatPromptTemplate.from_messages([
+        (
+            "system",
+            "You are a helpful assistant that answers questions about company policies, benefits, and procedures. "
+            "You have access to the following tools:\n\n{tools}\n\n"
+            "Use the following format:\n"
+            "Thought: Do I need to use a tool? Yes\n"
+            "Action: the action to take, should be one of [{tool_names}]\n"
+            "Action Input: the input to the action\n"
+            "Observation: the result of the action\n"
+            "... (this Thought/Action/Action Input/Observation can repeat N times)\n"
+            "Thought: Do I need to use a tool? No\n"
+            "Final Answer: the final answer to the original input question\n\n"
+            "Always cite which document chunks you used in your answer."
+        ),
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("user", "{input}"),
+        ("user", "{agent_scratchpad}"),
+    ])
+    
+    # Create the ReAct agent using the LLM, tools, and prompt template
+    # ReAct pattern: Reason and Act iteratively
+    # The agent thinks about what to do, then executes an action
+    agent = create_react_agent(
+        llm=chat_model,
+        tools=search_tools,
+        prompt=prompt
+    )
+    
+    # Create the AgentExecutor to run the agent
+    # AgentExecutor orchestrates the agent's reasoning and tool execution
+    agent_executor = AgentExecutor(
+        agent=agent,
+        tools=search_tools,
+        verbose=True,  # Print the agent's reasoning and actions
+        handle_parsing_errors=True
+    )
+    
+    print("✅ ReAct Agent initialized successfully\n")
+    print(f"🔧 Available tools: {[tool.name for tool in search_tools]}\n")
+    
+    # =================================================================
+    # Interactive Chat Interface
+    # =================================================================
+    print("=== Conversational Agent Chat Interface ===")
+    print("Welcome to the Company Information Assistant!")
+    print("Ask questions about company policies, benefits, and procedures.")
+    print("The agent will search the company documents to find relevant information.")
+    print("Type 'quit' or 'exit' to end the conversation.\n")
+    
+    # Initialize chat history to maintain conversation context
+    chat_history = []
+    
+    # Interactive chat loop
+    while True:
+        # Prompt user for input
+        user_input = input("You: ").strip()
+        
+        # Exit conditions
+        if user_input.lower() in ["quit", "exit"]:
+            print("Agent: Thank you for using the Company Information Assistant. Goodbye!")
+            break
+        
+        # Skip empty input
+        if not user_input:
+            continue
+        
+        try:
+            # Invoke the agent with user input and chat history
+            response = agent_executor.invoke({
+                "input": user_input,
+                "chat_history": chat_history
+            })
+            
+            # Extract the agent's response
+            agent_response = response.get("output", "No response generated.")
+            
+            # Print the agent's response
+            print(f"\nAgent: {agent_response}\n")
+            
+            # Add the exchange to chat history for context in future turns
+            # Using HumanMessage and AIMessage from langchain_core.messages
+            chat_history.append(HumanMessage(content=user_input))
+            chat_history.append(AIMessage(content=agent_response))
+            
+        except Exception as e:
+            print(f"\n❌ Error: {str(e)}\n")
+            print("Please try again with a different question.\n")
 
     # TODO: Replace with document loading logic
     # # Test sentences for embedding demonstration - diverse topics

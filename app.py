@@ -482,10 +482,12 @@ def main():
     
     # Create the AgentExecutor to run the agent
     # AgentExecutor orchestrates the agent's reasoning and tool execution
+    # verbose=False to reduce unnecessary output of search results
+    # We'll show only the final answer, not intermediate tool calls
     agent_executor = AgentExecutor(
         agent=agent,
         tools=search_tools,
-        verbose=True,  # Print the agent's reasoning and actions
+        verbose=False,  # Set to False to hide intermediate tool outputs
         handle_parsing_errors=True
     )
     
@@ -503,6 +505,12 @@ def main():
     
     # Initialize chat history to maintain conversation context
     chat_history = []
+    
+    # Maximum number of message pairs to keep in history (to manage token limits)
+    # Reduced aggressively to prevent token overflow with gpt-4o's 8000 token limit
+    # 4 messages = 2 message pairs (last question + answer pair)
+    # This ensures we stay well under the token limit even with large search results
+    MAX_HISTORY_LENGTH = 4
     
     # Interactive chat loop
     while True:
@@ -535,6 +543,11 @@ def main():
             # Using HumanMessage and AIMessage from langchain_core.messages
             chat_history.append(HumanMessage(content=user_input))
             chat_history.append(AIMessage(content=agent_response))
+            
+            # Implement a sliding window to manage token limits
+            # Keep only the most recent messages to prevent exceeding token limits
+            if len(chat_history) > MAX_HISTORY_LENGTH:
+                chat_history = chat_history[-MAX_HISTORY_LENGTH:]
             
         except Exception as e:
             print(f"\n❌ Error: {str(e)}\n")
